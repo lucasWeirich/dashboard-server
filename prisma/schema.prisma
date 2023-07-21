@@ -1,0 +1,75 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id         String   @id @default(uuid())
+  name       String
+  login      String   @unique
+  password   String
+  sales_goal Float    @default(100)
+  themeDark  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  Products Product[]
+  Sales    Sales[]
+  Order    Order[]
+}
+
+model Product {
+  id        String @id @default(uuid())
+  companyId String
+
+  name              String
+  description       String
+  image             String
+  price             Float
+  quantity_in_stock Int
+  createdAt         DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id])
+  Sales   Sales[]
+  Order   Order[]
+}
+
+model Sales {
+  id        String @id @default(uuid())
+  companyId String
+  productId String
+
+  quantity  Int
+  value     Float
+  createdAt DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+}
+
+model Order {
+  id        String @id @default(uuid())
+  companyId String
+  productId String
+
+  quantity  Int
+  value     Float
+  statusId  Int      @default(1)
+  createdAt DateTime @default(now())
+
+  status  OrderStatus @relation(fields: [statusId], references: [id])
+  company Company     @relation(fields: [companyId], references: [id])
+  product Product     @relation(fields: [productId], references: [id])
+}
+
+model OrderStatus {
+  id    Int     @id @unique @default(autoincrement())
+  label String  @unique
+  Order Order[]
+}
