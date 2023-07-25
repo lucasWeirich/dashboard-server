@@ -3,8 +3,11 @@ import { prisma } from "../lib/prisma";
 import { z } from "zod";
 
 export async function companiesRoutes(app: FastifyInstance) {
+  app.addHook('preHandler', async (req) => {
+    await req.jwtVerify()
+  })
 
-  app.get('/companies', async () => {
+  /* app.get('/companies', async () => {
     const company = await prisma.company.findMany({
       orderBy: {
         createdAt: 'desc'
@@ -12,15 +15,19 @@ export async function companiesRoutes(app: FastifyInstance) {
     })
 
     return company
-  })
+  }) */
 
   // ------------------------------------------------
-  app.get('/company/:id', async (req) => {
+  app.get('/company/:id', async (req, reply) => {
     const paramsSchema = z.object({
       id: z.string().uuid(),
     })
 
     const { id } = paramsSchema.parse(req.params)
+
+    if (id !== req.user.sub) {
+      return reply.status(401).send()
+    }
 
     const company = await prisma.company.findUniqueOrThrow({
       where: {
@@ -32,7 +39,7 @@ export async function companiesRoutes(app: FastifyInstance) {
   })
 
   // ------------------------------------------------
-  app.post('/company', async (req) => {
+  /* app.post('/company', async (req) => {
     const bodySchema = z.object({
       name: z.string(),
       login: z.string(),
@@ -54,11 +61,10 @@ export async function companiesRoutes(app: FastifyInstance) {
     })
 
     return company
-  })
-
+  }) */
 
   // ------------------------------------------------
-  app.put('/company/:id', async (req) => {
+  app.put('/company/:id', async (req, reply) => {
     const paramsSchema = z.object({
       id: z.string().uuid()
     })
@@ -72,6 +78,10 @@ export async function companiesRoutes(app: FastifyInstance) {
     const { id } = paramsSchema.parse(req.params)
     const { name, sales_goal, password } = bodySchema.parse(req.body)
 
+    if (id !== req.user.sub) {
+      return reply.status(401).send()
+    }
+
     const company = await prisma.company.update({
       where: {
         id,
@@ -83,16 +93,33 @@ export async function companiesRoutes(app: FastifyInstance) {
       }
     })
 
-    return company
+    const token = app.jwt.sign(
+      {
+        name: company.name,
+        login: company.login,
+        sales_goal: company.sales_goal,
+        themeDark: company.themeDark,
+      },
+      {
+        sub: company.id,
+        expiresIn: '1h'
+      }
+    )
+
+    return { token }
   })
 
   // ------------------------------------------------
-  app.patch('/company/theme/:id', async (req) => {
+  app.patch('/company/theme/:id', async (req, reply) => {
     const paramsSchema = z.object({
       id: z.string().uuid()
     })
 
     const { id } = paramsSchema.parse(req.params)
+
+    if (id !== req.user.sub) {
+      return reply.status(401).send()
+    }
 
     const { themeDark } = await prisma.company.findUniqueOrThrow({
       where: {
@@ -109,21 +136,38 @@ export async function companiesRoutes(app: FastifyInstance) {
       }
     })
 
-    return company.themeDark
+    const token = app.jwt.sign(
+      {
+        name: company.name,
+        login: company.login,
+        sales_goal: company.sales_goal,
+        themeDark: company.themeDark,
+      },
+      {
+        sub: company.id,
+        expiresIn: '1h'
+      }
+    )
+
+    return { token }
   })
 
   // ------------------------------------------------
-  app.delete('/company/:id', async (req) => {
+  /* app.delete('/company/:id', async (req, reply) => {
     const paramsSchema = z.object({
       id: z.string().uuid()
     })
 
     const { id } = paramsSchema.parse(req.params)
 
+    if (id !== req.user.sub) {
+      return reply.status(401).send()
+    }
+
     await prisma.company.delete({
       where: {
         id,
       }
     })
-  })
+  }) */
 }

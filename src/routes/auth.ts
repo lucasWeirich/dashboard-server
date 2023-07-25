@@ -1,9 +1,7 @@
 import { FastifyInstance } from "fastify";
-import axios from 'axios'
 import { z } from "zod";
 import { prisma } from "../lib/prisma";
 import bcrypt from 'bcrypt'
-import { FastifyJWT } from "@fastify/jwt";
 
 export async function authRoutes(app: FastifyInstance) {
   app.post('/login', async (req, reply) => {
@@ -41,7 +39,6 @@ export async function authRoutes(app: FastifyInstance) {
         expiresIn: '1h'
       }
     )
-
 
     return { token }
   })
