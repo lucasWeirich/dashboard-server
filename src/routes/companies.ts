@@ -72,11 +72,11 @@ export async function companiesRoutes(app: FastifyInstance) {
     const bodySchema = z.object({
       name: z.string(),
       sales_goal: z.number(),
-      password: z.string(),
+      //password: z.string(),
     })
 
     const { id } = paramsSchema.parse(req.params)
-    const { name, sales_goal, password } = bodySchema.parse(req.body)
+    const { name, sales_goal } = bodySchema.parse(req.body)
 
     if (id !== req.user.sub) {
       return reply.status(401).send()
@@ -89,7 +89,7 @@ export async function companiesRoutes(app: FastifyInstance) {
       data: {
         name,
         sales_goal,
-        password // Futuramente, enviar um código de verificacao ao e-mail
+        //password // Futuramente, enviar um código de verificacao ao e-mail
       }
     })
 
