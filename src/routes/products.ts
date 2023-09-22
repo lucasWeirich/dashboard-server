@@ -20,11 +20,15 @@ export async function productsRoutes(app: FastifyInstance) {
       }
     })
 
+
     return products.map(product => {
+      let newDescription = product.description.length < 115 ? product.description : product.description.substring(0, 115).concat('...');
+
       return {
         id: product.id,
         image: product.image,
         name: product.name,
+        description: newDescription,
         price: product.price,
         orders: product.Order.length
       }
@@ -54,6 +58,33 @@ export async function productsRoutes(app: FastifyInstance) {
     }
 
     return product
+  })
+
+  // ------------------------------------------------
+  app.get('/product/edit/:id', async (req, reply) => {
+    const paramsSchema = z.object({
+      id: z.string().uuid(),
+    })
+
+    const { id } = paramsSchema.parse(req.params)
+
+    const product = await prisma.product.findUniqueOrThrow({
+      where: {
+        id,
+      },
+    })
+
+    if (product.companyId !== req.user.sub) {
+      return reply.status(401).send()
+    }
+
+    return {
+      name: product.name,
+      description: product.description,
+      image: product.image,
+      price: product.price,
+      quantity_in_stock: product.quantity_in_stock
+    }
   })
 
   // ------------------------------------------------
