@@ -4,6 +4,8 @@ import jwt from '@fastify/jwt'
 import { authRoutes } from './routes/auth'
 import { companiesRoutes } from './routes/companies'
 import { productsRoutes } from './routes/products'
+import { ordersRoutes } from './routes/orders'
+import { ordersStatusRoutes } from './routes/ordersStatus'
 
 const app = fastify()
 
@@ -18,6 +20,8 @@ app.register(jwt, {
 app.register(authRoutes)
 app.register(companiesRoutes)
 app.register(productsRoutes)
+app.register(ordersStatusRoutes) 
+app.register(ordersRoutes)
 
 app
   .listen({
