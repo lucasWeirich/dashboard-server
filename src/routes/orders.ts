@@ -109,6 +109,40 @@ export async function ordersRoutes(app: FastifyInstance) {
       }
     })
 
+    if (statusId === 2) {
+      const [sale] = await prisma.sales.findMany({
+        where: {
+          productId: productId
+        },
+        select: {
+          id: true,
+          quantity: true,
+          value: true
+        }
+      })
+
+      if (sale) {
+        await prisma.sales.update({
+          where: {
+            id: sale.id
+          },
+          data: {
+            quantity: sale.quantity + order.quantity,
+            value: sale.value + (order.quantity * order.value)
+          }
+        });
+      } else {
+        await prisma.sales.create({
+          data: {
+            quantity: order.quantity,
+            value: order.value,
+            productId: order.productId,
+            companyId: req.user.sub
+          }
+        })
+      }
+    }
+
     return order
   })
 
@@ -146,6 +180,40 @@ export async function ordersRoutes(app: FastifyInstance) {
         updateStatusAt: new Date(),
       }
     })
+
+    if (statusId === 2) {
+      const [sale] = await prisma.sales.findMany({
+        where: {
+          productId: order.productId
+        },
+        select: {
+          id: true,
+          quantity: true,
+          value: true
+        }
+      })
+
+      if (sale) {
+        await prisma.sales.update({
+          where: {
+            id: sale.id
+          },
+          data: {
+            quantity: sale.quantity + order.quantity,
+            value: sale.value + (order.quantity * order.value)
+          }
+        });
+      } else {
+        await prisma.sales.create({
+          data: {
+            quantity: order.quantity,
+            value: order.value,
+            productId: order.productId,
+            companyId: req.user.sub
+          }
+        })
+      }
+    }
 
     if (statusId === 3) {
       await prisma.product.update({

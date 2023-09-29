@@ -6,6 +6,7 @@ import { companiesRoutes } from './routes/companies'
 import { productsRoutes } from './routes/products'
 import { ordersRoutes } from './routes/orders'
 import { ordersStatusRoutes } from './routes/ordersStatus'
+import { salesRoutes } from './routes/sales'
 
 const app = fastify()
 
@@ -22,6 +23,7 @@ app.register(companiesRoutes)
 app.register(productsRoutes)
 app.register(ordersStatusRoutes) 
 app.register(ordersRoutes)
+app.register(salesRoutes)
 
 app
   .listen({
