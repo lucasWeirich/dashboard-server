@@ -62,6 +62,7 @@ model Order {
   value     Float
   statusId  Int      @default(1)
   createdAt DateTime @default(now())
+  updateStatusAt DateTime @default(now())
 
   status  OrderStatus @relation(fields: [statusId], references: [id])
   company Company     @relation(fields: [companyId], references: [id])
@@ -71,5 +72,6 @@ model Order {
 model OrderStatus {
   id    Int     @id @unique @default(autoincrement())
   label String  @unique
+  color String  @default("#333")
   Order Order[]
 }

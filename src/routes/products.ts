@@ -35,6 +35,30 @@ export async function productsRoutes(app: FastifyInstance) {
     })
   })
 
+  app.get('/products_select', async (req) => {
+    const products = await prisma.product.findMany({
+      where: {
+        companyId: req.user.sub,
+        quantity_in_stock: {
+          not: {
+            equals: 0
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      select: {
+        id: true,
+        name: true,
+        price: true,
+        quantity_in_stock: true
+      }
+    })
+
+    return products
+  })
+
   // ------------------------------------------------
   app.get('/product/:id', async (req, reply) => {
     const paramsSchema = z.object({

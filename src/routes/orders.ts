@@ -16,8 +16,12 @@ export async function ordersRoutes(app: FastifyInstance) {
         createdAt: 'desc'
       },
       include: {
-
-      }
+        product: {
+          select: {
+            name: true
+          }
+        }
+      },
     })
 
     return orders.map(order => {
@@ -26,7 +30,9 @@ export async function ordersRoutes(app: FastifyInstance) {
         quantity: order.quantity,
         value: order.value,
         statusId: order.statusId,
-        createdAt: order.createdAt
+        createdAt: order.createdAt,
+        updateStatusAt: order.updateStatusAt,
+        nameProduct: order.product.name
       }
     })
   })
@@ -65,17 +71,20 @@ export async function ordersRoutes(app: FastifyInstance) {
 
     const { quantity, statusId, productId } = bodySchema.parse(req.body)
 
-    const { price } = await prisma.product.findUniqueOrThrow({
+    const { price, quantity_in_stock } = await prisma.product.findUniqueOrThrow({
       where: {
         id: productId,
         companyId: req.user.sub
       },
       select: {
-        price: true
+        price: true,
+        quantity_in_stock: true
       }
     })
 
+    if (quantity < 1 || quantity > quantity_in_stock) return reply.status(400).send('Invalid quantity')
     if (!price) return reply.status(404).send()
+    if (statusId !== 1 && statusId !== 2) return reply.status(400).send('Invalid status')
 
     const value = Number(price * quantity)
 
@@ -86,6 +95,17 @@ export async function ordersRoutes(app: FastifyInstance) {
         statusId,
         productId,
         companyId: req.user.sub
+      }
+    })
+
+    await prisma.product.update({
+      where: {
+        id: productId
+      },
+      data: {
+        quantity_in_stock: {
+          decrement: order.quantity
+        }
       }
     })
 
@@ -111,6 +131,8 @@ export async function ordersRoutes(app: FastifyInstance) {
       }
     })
 
+    if (order.statusId === 2 || order.statusId === 3) return reply.status(400).send('Blocked status')
+
     if (order.companyId !== req.user.sub) {
       return reply.status(401).send()
     }
@@ -121,9 +143,22 @@ export async function ordersRoutes(app: FastifyInstance) {
       },
       data: {
         statusId,
-        createdAt: new Date(),
+        updateStatusAt: new Date(),
       }
     })
+
+    if (statusId === 3) {
+      await prisma.product.update({
+        where: {
+          id: order.productId
+        },
+        data: {
+          quantity_in_stock: {
+            increment: order.quantity
+          }
+        }
+      })
+    }
 
     return order
   })

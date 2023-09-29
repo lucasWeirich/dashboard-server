@@ -51,7 +51,8 @@ CREATE TABLE "Order" (
 -- CreateTable
 CREATE TABLE "OrderStatus" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    "label" TEXT NOT NULL
+    "label" TEXT NOT NULL,
+    "color" TEXT NOT NULL DEFAULT '#333'
 );
 
 -- CreateIndex

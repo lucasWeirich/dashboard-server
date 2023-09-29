@@ -21,13 +21,15 @@ export async function ordersStatusRoutes(app: FastifyInstance) {
   app.post('/order_status', async (req) => {
     const bodySchema = z.object({
       label: z.string(),
+      color: z.string(),
     })
 
-    const { label } = bodySchema.parse(req.body)
+    const { label, color } = bodySchema.parse(req.body)
 
     const orderStatus = await prisma.orderStatus.create({
       data: {
         label,
+        color,
       }
     })
 
@@ -41,11 +43,12 @@ export async function ordersStatusRoutes(app: FastifyInstance) {
     })
 
     const bodySchema = z.object({
-      label: z.string()
+      label: z.string(),
+      color: z.string()
     })
 
     const { id } = paramsSchema.parse(req.params)
-    const { label } = bodySchema.parse(req.body)
+    const { label, color } = bodySchema.parse(req.body)
 
     const orderStatus = await prisma.orderStatus.update({
       where: {
@@ -53,6 +56,7 @@ export async function ordersStatusRoutes(app: FastifyInstance) {
       },
       data: {
         label,
+        color,
       }
     })
 
