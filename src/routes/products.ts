@@ -60,6 +60,38 @@ export async function productsRoutes(app: FastifyInstance) {
   })
 
   // ------------------------------------------------
+  app.get('/top-selling-products', async (req, reply) => {
+    const products = await prisma.product.findMany({
+      where: {
+        companyId: req.user.sub,
+        Order: {
+          some: {
+            statusId: 2
+          }
+        }
+      },
+      include: {
+        Order: true,
+      }
+    });
+
+    const topSellingProducts = products
+      .map(product => {
+        return {
+          id: product.id,
+          image: product.image,
+          name: product.name,
+          price: product.price,
+          orders: product.Order.filter(order => order.statusId === 2).length
+        };
+      })
+      .sort((a, b) => b.orders - a.orders)
+      .slice(0, 4);
+
+    return topSellingProducts
+  })
+
+  // ------------------------------------------------
   app.get('/product/:id', async (req, reply) => {
     const paramsSchema = z.object({
       id: z.string().uuid(),

@@ -128,7 +128,8 @@ export async function ordersRoutes(app: FastifyInstance) {
           },
           data: {
             quantity: sale.quantity + order.quantity,
-            value: sale.value + (order.quantity * order.value)
+            value: sale.value + (order.quantity * order.value),
+            createdAt: new Date()
           }
         });
       } else {
@@ -200,7 +201,8 @@ export async function ordersRoutes(app: FastifyInstance) {
           },
           data: {
             quantity: sale.quantity + order.quantity,
-            value: sale.value + (order.quantity * order.value)
+            value: sale.value + (order.quantity * order.value),
+            createdAt: new Date()
           }
         });
       } else {
