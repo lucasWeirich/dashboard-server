@@ -8,6 +8,7 @@ import { ordersRoutes } from './routes/orders'
 import { ordersStatusRoutes } from './routes/ordersStatus'
 import { salesRoutes } from './routes/sales'
 import { metricsRoutes } from './routes/metrics'
+import { reportRoutes } from './routes/report'
 
 const app = fastify()
 
@@ -26,6 +27,7 @@ app.register(ordersStatusRoutes)
 app.register(ordersRoutes)
 app.register(salesRoutes)
 app.register(metricsRoutes)
+app.register(reportRoutes)
 
 app
   .listen({
